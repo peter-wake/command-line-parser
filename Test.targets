@@ -1,0 +1,6 @@
+<Project>
+
+  <Import Project="$(MSBuildThisFileDirectory)lib/NUnit.targets"/>
+  <Import Project="$(MSBuildThisFileDirectory)lib/FakeItEasy.targets"/>
+
+</Project>
