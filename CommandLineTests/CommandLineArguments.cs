@@ -67,16 +67,16 @@ namespace CommandLineTests
             const string verboseFlag = "-v";
             const string ultraVerboseFlag = "-V";
 
-            if (FindFlag(verboseFlag, arguments))
-            {
-                Verbose = true;
-            }
+            FindFlag(verboseFlag, arguments, () =>
+                {
+                    Verbose = true;
+                });
 
-            if (FindFlag(ultraVerboseFlag, arguments))
-            {
-                Verbose = true;
-                UltraVerbose = true;
-            }
+            FindFlag(ultraVerboseFlag, arguments, () =>
+                {
+                    Verbose = true;
+                    UltraVerbose = true;
+                });
         }
 
         public void HostMatcher(List<string> arguments)
@@ -152,28 +152,26 @@ namespace CommandLineTests
 
         private void LocalAddressMatcher(List<string> arguments)
         {
-            string parameter;
-            while (FindParameter("-local", arguments, out parameter))
+            FindParameter("-local", arguments, parameter =>
             {
                 _localAddressA = parameter;
                 _localAddressB = parameter;
-            }
-            while (FindParameter("-localA", arguments, out parameter))
+            });
+            FindParameter("-localA", arguments, parameter =>
             {
                 _localAddressA = parameter;
-            }
-            while (FindParameter("-localB", arguments, out parameter))
+            });
+            FindParameter("-localB", arguments, parameter =>
             {
                 _localAddressB = parameter;
-            }
+            });
         }
 
 
 
         public void TimeoutMatcher(List<string> arguments)
         {
-            string parameter;
-            while (FindParameter("-timeout", arguments, out parameter))
+            FindParameter("-timeout", arguments, parameter =>
             {
                 double timeout;
                 bool failed = !double.TryParse(parameter, out timeout);
@@ -186,32 +184,33 @@ namespace CommandLineTests
                 {
                     TimeoutInSeconds = timeout;
                 }
-            }
+            });
         }
 
         public void KindMatcher(List<string> arguments)
         {
-            string parameter;
-            while (FindParameter("-kind", arguments, out parameter))
-            {
-                var text = parameter.ToLower();
-                if ("one" == text)
+            FindParameter("-kind",
+                arguments,
+                parameter =>
                 {
-                    Kind = EnumeratedKind.One;
-                }
-                else if ("two" == text)
-                {
-                    Kind = EnumeratedKind.Two;
-                }
-                else if ("three" == text)
-                {
-                    Kind = EnumeratedKind.Three;
-                }
-                else
-                {
-                    Errors.Add($"Could not parse '-kind {parameter}' - not a valid test kind (one, two, three)");
-                }
-            }
+                    var text = parameter.ToLower();
+                    if ("one" == text)
+                    {
+                        Kind = EnumeratedKind.One;
+                    }
+                    else if ("two" == text)
+                    {
+                        Kind = EnumeratedKind.Two;
+                    }
+                    else if ("three" == text)
+                    {
+                        Kind = EnumeratedKind.Three;
+                    }
+                    else
+                    {
+                        Errors.Add($"Could not parse '-kind {parameter}' - not a valid test kind (one, two, three)");
+                    }
+                });
         }
 
 
