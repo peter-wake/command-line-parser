@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 
+// ReSharper disable once CheckNamespace
 namespace CommandLine
 {
     public abstract class CommandLineArgumentsBase
     {
+        private const string UnspecifiedProgramName = "UNSPECIFIED-PROGRAM-NAME";
+
+        private const int DefaultErrorCodeValidCommandLine = 0;
         private const int DefaultErrorCodeBadCommandLine = -1;
 
         public IList<string> Errors { get; private set; }
@@ -22,12 +26,36 @@ namespace CommandLine
         {
             var commandLine = Environment.CommandLine;
             var parser = new CommandLineParser(commandLine);
-            var result = parser.Parse(Matchers);
+            List<string> result = null;
 
-            if (null != programName && HasErrors)
+            programName = programName ?? UnspecifiedProgramName;
+
+            try
+            {
+                result = parser.Parse(Matchers);
+            }
+            catch (PrematureMatchTerminationException e)
+            {
+                if (HasErrors)
+                {
+                    DisplayErrors(programName);
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(e.Message))
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                    Console.WriteLine("{0} {1}", programName, GetHelp());
+                    Environment.Exit(DefaultErrorCodeValidCommandLine);
+                }
+            }
+
+            if (HasErrors)
             {
                 DisplayErrors(programName);
             }
+
             return result;
         }
 
